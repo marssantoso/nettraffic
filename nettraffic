@@ -1,0 +1,99 @@
+#! /bin/bash
+
+GET="cat /proc/net/dev"
+LABEL=false
+
+while getopts i:a:u:s:lU:D: option
+do
+  case "${option}"
+  in
+    i)
+      IF=${OPTARG};;
+    a)
+      RT=${OPTARG};;
+    u)
+      UNIT=${OPTARG};;
+    s)
+      SEP=${OPTARG};;
+    l)
+      LABEL=true;;
+    U)
+      UPL=${OPTARG};;
+    D)
+      DNL=${OPTARG};;
+  esac
+done
+
+if [[ "$IF" = "" ]]; then
+  echo "No interface specified"
+  exit
+fi
+
+if [[ "$LABEL" = true ]]; then
+  if [[ "$UPL" = "" ]]; then
+    UP="up"
+  else
+    UP=$UPL
+  fi
+  if [[ "$DNL" = "" ]]; then
+    DN="dn"
+  else
+    DN=$DNL
+  fi
+else
+  UP=""
+  DN=""
+fi
+
+if [[ "$UNIT" = "MB" || "$UNIT" = "M" ]]; then
+  FAC=1048576; SUF=" MB/s"
+elif [[ "$UNIT" = "KB" || "$UNIT" = "K" ]]; then
+  FAC=1024; SUF=" KB/s"
+elif [[ "$UNIT" = "B" ]]; then
+  FAC=1; SUF=" B/s"
+fi
+
+while :
+do
+  RX1=`$GET | grep $IF | awk '{print $2}'`; TX1=`$GET | grep $IF | awk '{print $10}'`
+  sleep 1
+  RX2=`$GET | grep $IF | awk '{print $2}'`; TX2=`$GET | grep $IF | awk '{print $10}'`
+
+  RX=`calc $RX2-$RX1`; TX=`calc $TX2-$TX1`; AX=`calc $RX+$TX`
+
+  if [[ "$UNIT" = "" ]]; then
+    if [[ "$RX" -ge 524288 || "$TX" -ge 1048576 ]]; then
+      FAC=1048576; SUF=" MB/s"
+    elif [[ "$RX" -ge 512 || "$TX" -ge 1024 ]]; then
+      FAC=1024; SUF=" KB/s"
+    else
+      FAC=1; SUF=" B/s"
+    fi
+  fi
+
+  RN=`calc $RX/$FAC | awk '{ x = sprintf("%.1f", $1); print x }'`
+  TN=`calc $TX/$FAC | awk '{ x = sprintf("%.1f", $1); print x }'`
+  AN=`calc $AX/$FAC | awk '{ x = sprintf("%.1f", $1); print x }'`
+
+  if [[ "$RT" = "up" ]]; then
+    echo "$TN$SUF$UP"
+  elif [[ "$RT" = "down" || "$RT" = "dn" ]]; then
+    echo "$RN$SUF$DN"
+  elif [[ "$RT" = "total" ]]; then
+    echo "$AN$SUF"
+  else
+    if [[ "$SEP" = "" ]]; then
+      if [[ "$LABEL" = false ]]; then
+        echo "$RN$SUF $TN$SUF"
+      else
+        echo "$RN$SUF $DN $TN$SUF $UP"
+      fi
+    else
+      if [[ "$LABEL" = false ]]; then
+        echo "$RN$SUF $SEP $TN$SUF"
+      else
+        echo "$RN$SUF $DN $SEP $TN$SUF $UP"
+      fi
+    fi
+  fi
+done
