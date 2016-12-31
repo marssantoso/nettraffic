@@ -50,6 +50,13 @@ Using custom labels
     0.0 B/s ^ 0.0 B/s v
     78.1 KB/s ^ 11.4 KB/s v
     114.9 KB/s ^ 21.0 KB/s v
+    
+Using custom interval
+
+    $ nettraffic -i wlp2s0 -t 3
+---
+
+    will essentially display the traffic every 3 seconds
 
 ## Changelog
 
@@ -61,6 +68,6 @@ Using custom labels
 * Changed the default threshold for auto unit/suffix
 * The script will now be executed in /bin/sh instead of /bin/bash
 
-### 20161230
+### 20161223
 
 * Initial Release
