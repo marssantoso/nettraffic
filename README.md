@@ -50,3 +50,17 @@ Using custom labels
     0.0 B/s ^ 0.0 B/s v
     78.1 KB/s ^ 11.4 KB/s v
     114.9 KB/s ^ 21.0 KB/s v
+
+## Changelog
+
+### 20170101
+
+* Added option to use custom interval (-t <seconds>)
+* Added in-line help (-h)
+* Added version number as well as a flag to display it (-v)
+* Changed the default threshold for auto unit/suffix
+* The script will now be executed in /bin/sh instead of /bin/bash
+
+### 20161230
+
+* Initial Release
