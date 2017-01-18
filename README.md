@@ -19,7 +19,7 @@ To get started, simply grant a permission to execute the file, and you can run i
       -h                  Prints help.
     
 ## Example
-Using the minimum requirements
+**Using the minimum requirements**
 
     $ nettraffic -i wlp2s0
 ---
@@ -28,7 +28,7 @@ Using the minimum requirements
     0.7KB/s 0.2KB/s
     53.0KB/s 13.6KB/s
 
-Displaying total data stream instead of individual up and down
+**Displaying total data stream instead of individual up and down**
 
     $ nettraffic -i wlp2s0 -a total -u K
 ---
@@ -37,7 +37,7 @@ Displaying total data stream instead of individual up and down
     73.4KB/s
     32.5KB/s
 
-Using labels and separator
+**Using labels and separator**
 
     $ nettraffic -i wlp2s0 -l -s "|"
 ---
@@ -46,7 +46,7 @@ Using labels and separator
     56.7KB/s dn | 32.2KB/s up
     0.2MB/s dn | 0.0MB/s up
 
-Using custom labels
+**Using custom labels**
 
     $ nettraffic -i wlp2s0 -l -D " ^" -U " v"
 ---
@@ -55,14 +55,14 @@ Using custom labels
     78.1KB/s ^ 11.4KB/s v
     0.1MB/s ^ 0.1MB/s v
     
-Using custom interval
+**Using custom interval**
 
     $ nettraffic -i wlp2s0 -t 3
 ---
 
     will essentially display the traffic every 3 seconds
 
-Using different unit levels
+**Using different unit levels**
 
     $ nettraffic -i wlp2s0 -u K -e 1
 ---
@@ -71,7 +71,7 @@ Using different unit levels
     12.1K 11.4K
     114.9K 21.0K
 
-Using different unit levels (another example)
+**Using different unit levels (another example)**
 
     $ nettraffic -i wlp2s0 -a dn -e 3 -l -D " down"
 ---
@@ -80,7 +80,7 @@ Using different unit levels (another example)
     43.2KB/s down
     0.3MB/s down
 
-Simplest output
+**Simplest output**
 
     $ nettraffic -i wlp2s0 -a up -e 1
 ---
@@ -88,6 +88,35 @@ Simplest output
     0.0B
     53.5KB
     0.2MB
+
+## Using it for [polybar](https://github.com/jaagr/polybar/)
+
+**Display both up and down traffic**
+
+    [module/nettraf]
+    type = custom/script
+    exec = nettraffic -i wlp2s0 -l -U  -D 
+    tail = true
+    interval = 1
+    format = <label>
+    label = %output%
+
+**Display traffic separately**
+
+    [module/ntrf]
+    type = custom/script
+    tail = true
+    interval = 1
+    format = <label>
+    label = %output%
+
+    [module/ntdn_text]
+    inherit = module/ntrf
+    exec = nettraffic -i wlp2s0 -a dn -e 1
+
+    [module/ntup_text]
+    inherit = module/ntrf
+    exec = nettraffic -i wlp2s0 -a up -e 1
 
 ## Changelog
 
