@@ -1,11 +1,11 @@
 #!/bin/sh
 
 NAME="nettrafic"
-VERSION="0.2.7"
+VERSION="0.3.4"
 GET="cat /proc/net/dev"
 LABEL=false
 
-while getopts i:a:u:s:t:U:D:lhv option
+while getopts i:a:u:e:s:t:U:D:lhv option
 do
   case "${option}"
   in
@@ -15,6 +15,8 @@ do
       RT=${OPTARG};;
     u)
       UNIT=${OPTARG};;
+    e)
+      ULEV=${OPTARG};;
     s)
       SEP=${OPTARG};;
     t)
@@ -29,15 +31,17 @@ do
       echo -e "Usage: nettraffic [OPTION]"
       echo -e "Options:"
       echo -e "  -i  (%ifname%)\t Specify which network interface to monitor. Required."
-      echo -e "  -a  (up|dn|down|total) Shows which data to display."
-      echo -e "  -u  (K|KB|M|MB)\t Units to show the data in."
-      echo -e "  -l  *no arguments*\t Choose whether or not to display the label (up or down)."
-      echo -e "  -s\t\t\t A separator to divide between up and down. Default is none."
-      echo -e "  -U\t\t\t The label for upstream data traffic."
-      echo -e "  -D\t\t\t The label for downstream data traffic."
-      echo -e "  -t\t\t\t Set the interval for the data update."
-      echo -e "  -v\t\t\t Display version number."
-      echo -e "  -h\t\\t\t Display this help."
+      echo -e "  -a  (up|dn|total)\t Shows which data to display. Prints both if not used."
+      echo -e "  -u  (K|KB|M|MB)\t Units to show the data in. Automatic if not specified."
+      echo -e "  -e  (0|1|2|3|4)\t Level of units displayed. (0 for none, 1 for K, 2 for KB, 3 for K/s,"
+      echo -e "    \t\t\t 4 for KB/s). Default if 4."
+      echo -e "  -l\t\t\t Choose whether or not to display the label (up or down)."
+      echo -e "  -s  (%string%)\t A separator to divide between up and down. Default is none."
+      echo -e "  -U  (%string%)\t The label for upstream data traffic. Default is up if -l is used."
+      echo -e "  -D  (%string%)\t The label for downstream data traffic. Default is dn if -l is used."
+      echo -e "  -t  (%integer%)\t Set the interval for the data update. Default is 1."
+      echo -e "  -v\t\t\t Prints version number."
+      echo -e "  -h\t\t\t Prints this help."
       echo "For full help, visit http://github.com/ma-santoso/nettrafic/"
       exit;;
     v)
@@ -55,12 +59,12 @@ fi
 
 if [[ "$LABEL" = true ]]; then
   if [[ "$UPL" = "" ]]; then
-    UP="up"
+    UP=" up"
   else
     UP=$UPL
   fi
   if [[ "$DNL" = "" ]]; then
-    DN="dn"
+    DN=" dn"
   else
     DN=$DNL
   fi
@@ -70,11 +74,34 @@ else
 fi
 
 if [[ "$UNIT" = "MB" || "$UNIT" = "M" ]]; then
-  FAC=1048576; SUF=" MB/s"
+  FAC=1048576
+  case "$ULEV"
+  in
+    0) SUF="";;
+    1) SUF="M";;
+    2) SUF="MB";;
+    3) SUF="M/s";;
+    *) SUF="MB/s";;
+  esac
 elif [[ "$UNIT" = "KB" || "$UNIT" = "K" ]]; then
-  FAC=1024; SUF=" KB/s"
+  FAC=1024
+  case "$ULEV"
+  in
+    0) SUF="";;
+    1) SUF="K";;
+    2) SUF="KB";;
+    3) SUF="K/s";;
+    *) SUF="KB/s";;
+  esac
 elif [[ "$UNIT" = "B" || "$UNIT" = "" ]]; then
-  FAC=1; SUF=" B/s"
+  FAC=1
+  case "$ULEV"
+  in
+    0) SUF="";;
+    1) SUF="B";;
+    2) SUF="B";;
+    *) SUF="B/s";;
+  esac
 fi
 
 if [[ "$DLY" = "" ]]; then
@@ -98,13 +125,13 @@ do
       if [[ "$LABEL" = false ]]; then
         echo "$RN$SUF $TN$SUF"
       else
-        echo "$RN$SUF $DN $TN$SUF $UP"
+        echo "$RN$SUF$DN $TN$SUF$UP"
       fi
     else
       if [[ "$LABEL" = false ]]; then
         echo "$RN$SUF $SEP $TN$SUF"
       else
-        echo "$RN$SUF $DN $SEP $TN$SUF $UP"
+        echo "$RN$SUF$DN $SEP $TN$SUF$UP"
       fi
     fi
   fi
@@ -116,12 +143,35 @@ do
   RX=($RX2-$RX1)/$DLY; TX=($TX2-$TX1)/$DLY; AX=$RX+$TX
 
   if [[ "$UNIT" = "" ]]; then
-    if [[ "$RX" -ge 105472 || "$TX" -ge 105472 ]]; then
-      FAC=1048576; SUF=" MB/s"
-    elif [[ "$RX" -ge 103 || "$TX" -ge 103 ]]; then
-      FAC=1024; SUF=" KB/s"
+    if [[ "$RX" -ge 102400 || "$TX" -ge 102400 ]]; then
+      FAC=1048576
+      case "$ULEV"
+      in
+        0) SUF="";;
+        1) SUF="M";;
+        2) SUF="MB";;
+        3) SUF="M/s";;
+        *) SUF="MB/s";;
+      esac
+    elif [[ "$RX" -ge 100 || "$TX" -ge 100 ]]; then
+      FAC=1024
+      case "$ULEV"
+      in
+        0) SUF="";;
+        1) SUF="K";;
+        2) SUF="KB";;
+        3) SUF="K/s";;
+        *) SUF="KB/s";;
+      esac
     else
-      FAC=1; SUF=" B/s"
+      FAC=1
+      case "$ULEV"
+      in
+        0) SUF="";;
+        1) SUF="B";;
+        2) SUF="B";;
+        *) SUF="B/s";;
+      esac
     fi
   fi
 
