@@ -8,8 +8,9 @@ To get started, simply grant a permission to execute the file, and you can run i
     Options:
       -i  (%ifname%)      Specify which network interface to monitor. Required.
       -a  (up|dn|total)   Shows which data to display. Prints both if not used.
-      -u  (K|KB|M|MB)     Units to show the data in. Automatic if not specified"
-      -e  (0|1|2|3|4)     Level of units displayed. (0 for none, 1 for K, 2 for KB, 3 for K/s, 4 for KB/s). Default if 4.
+      -u  (K|KB|M|MB)     Units to show the data in. Automatic if not specified.
+      -b                  Show in bits per second (kbps, mbps - small b).
+      -e  (0|1|2|3|4|5)   Level of units displayed. (0 for none, 1 for K, 2 for KB, 3 for K/s, 4 for Kb/s, 5 for KB/s). Default of 5.
       -l                  Choose whether or not to display the label (up or down).
       -s  (%string%)      A separator to divide between up and down. Default is none.
       -U  (%string%)      The label for upstream data traffic. Default is up if -l is used.
