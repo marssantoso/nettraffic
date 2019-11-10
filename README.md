@@ -17,7 +17,11 @@ To get started, simply grant a permission to execute the file, and you can run i
       -t  (%integer%)     Set the interval for the data update. Default is 1.
       -v                  Prints version number.
       -h                  Prints help.
-    
+
+### Dependencies
+
+bash, calc, grep, and awk are required for the script to run.
+
 ## Example
 **Using the minimum requirements**
 

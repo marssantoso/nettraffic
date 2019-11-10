@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+
+hash calc 2>/dev/null || { echo >&2 "calc is required but not installed, aborting."; exit 1; }
 
 NAME="nettrafic"
 VERSION="0.3.4"
